@@ -1,7 +1,13 @@
 import * as BABYLON from "babylonjs";
+import { Constants } from "./Constants";
+import { Receiver } from "./Receiver";
+import { Satellite } from "./Satellite";
+
 export class AppOne {
     engine: BABYLON.Engine;
     scene: BABYLON.Scene;
+    receiver: Receiver;
+    satellites: Satellite[] = [];
 
     constructor(readonly canvas: HTMLCanvasElement) {
         this.engine = new BABYLON.Engine(canvas);
@@ -9,6 +15,8 @@ export class AppOne {
             this.engine.resize();
         });
         this.scene = createScene(this.engine, this.canvas);
+        this.receiver = new Receiver(this.scene);
+        this.satellites.push(new Satellite(this.scene));
     }
 
     debug(debugOn: boolean = true) {
@@ -28,79 +36,48 @@ export class AppOne {
 }
 
 function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
-    // this is the default code from the playground:
+    const cameraAlpha = Math.PI * 0.5;
+    const cameraBeta = Math.PI * 0.5;
 
     // This creates a basic Babylon Scene object (non-mesh)
-    var scene = new BABYLON.Scene(engine);
+    const scene = new BABYLON.Scene(engine);
+    scene.useRightHandedSystem = true;
+    scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
 
     // This creates and positions a free camera (non-mesh)
-    var camera = new BABYLON.ArcRotateCamera(
+    const camera = new BABYLON.ArcRotateCamera(
         "Camera",
-        0,
-        0,
-        10,
+        cameraAlpha,
+        cameraBeta,
+        100.0,
         new BABYLON.Vector3(0, 0, 0),
         scene,
     );
 
-    // This targets the camera to scene origin
-    camera.setTarget(BABYLON.Vector3.Zero());
-
     // This attaches the camera to the canvas
     camera.attachControl(canvas, true);
 
-    // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-    var light = new BABYLON.HemisphericLight(
-        "light",
-        new BABYLON.Vector3(0, 1, 0),
-        scene,
-    );
-
-    // Default intensity is 1. Let's dim the light a small amount
-    light.intensity = 0.7;
+    // This creates a light, aiming 1,-1,-3
+    new BABYLON.DirectionalLight("sun", new BABYLON.Vector3(1, -1, -3), scene);
 
     // Our built-in 'sphere' shape.
-    var sphere = BABYLON.MeshBuilder.CreateSphere(
-        "sphere",
-        { diameter: 2, segments: 32 },
+    const earth = BABYLON.MeshBuilder.CreateSphere(
+        "earth",
+        { diameter: Constants.earthDiameterMm, segments: 32 },
         scene,
     );
-    // Move the sphere upward 1/2 its height
-    let startPos = 2;
-    sphere.position.y = startPos;
+    earth.rotate(BABYLON.Axis.Y, Math.PI * 0.75, BABYLON.Space.LOCAL);
 
-    // Our built-in 'ground' shape.
-    var ground = BABYLON.MeshBuilder.CreateGround(
-        "ground",
-        { width: 6, height: 6 },
-        scene,
-    );
-    var groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
-    groundMaterial.diffuseColor = new BABYLON.Color3(0.5, 0.8, 0.5); // RGB for a greenish color
-    ground.material = groundMaterial;
-    groundMaterial.bumpTexture = new BABYLON.Texture("./normal.jpg", scene);
-    //groundMaterial.bumpTexture.level = 0.125;
-
-    var redMaterial = new BABYLON.StandardMaterial("redMaterial", scene);
-    redMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0); // RGB for red
-    sphere.material = redMaterial;
-
-    var sphereVelocity = 0;
-    var gravity = 0.009;
-    var reboundLoss = 0.1;
+    const earthMaterial = new BABYLON.StandardMaterial("earthMaterial", scene);
+    earthMaterial.specularColor = BABYLON.Color3.Black();
+    earthMaterial.diffuseTexture = new BABYLON.Texture("./earth.jpg", scene, {
+        invertY: false,
+    });
+    earth.material = earthMaterial;
 
     scene.registerBeforeRender(() => {
-        sphereVelocity += gravity;
-        let newY = sphere.position.y - sphereVelocity;
-        sphere.position.y -= sphereVelocity;
-        if (newY < 1) {
-            sphereVelocity = (reboundLoss - 1) * sphereVelocity;
-            newY = 1;
-        }
-        sphere.position.y = newY;
-        if (Math.abs(sphereVelocity) <= gravity && newY < 1 + gravity) {
-            sphere.position.y = startPos++;
-        }
+        camera.alpha = cameraAlpha;
+        camera.beta = cameraBeta;
     });
 
     return scene;
