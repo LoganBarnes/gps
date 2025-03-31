@@ -17,7 +17,7 @@ Then in vscode press F5, otherwise just open a browser at http://localhost:3000/
 
 ## Live Demo
 You can see this repository live here:
-https://babylonjs-vite-boilerplate.vercel.app/
+https://loganbarnes.github.io/gps
 
 ## Production build
 First `npm run build`
