@@ -2,10 +2,12 @@ import * as BABYLON from "babylonjs";
 import { Constants } from "./Constants";
 import { Receiver } from "./Receiver";
 import { Satellite } from "./Satellite";
+import { Camera } from "./Camera";
 
 export class AppOne {
     engine: BABYLON.Engine;
     scene: BABYLON.Scene;
+    camera: Camera;
     receiver: Receiver;
     satellites: Satellite[] = [];
 
@@ -15,6 +17,7 @@ export class AppOne {
             this.engine.resize();
         });
         this.scene = createScene(this.engine, this.canvas);
+        this.camera = new Camera(this.scene, this.canvas);
         this.receiver = new Receiver(this.scene);
         this.satellites.push(new Satellite(this.scene));
     }
@@ -35,6 +38,8 @@ export class AppOne {
     }
 }
 
+let prevCamRadius = 0.0;
+
 function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
     const cameraAlpha = Math.PI * 0.5;
     const cameraBeta = Math.PI * 0.5;
@@ -43,19 +48,6 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
     const scene = new BABYLON.Scene(engine);
     scene.useRightHandedSystem = true;
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-
-    // This creates and positions a free camera (non-mesh)
-    const camera = new BABYLON.ArcRotateCamera(
-        "Camera",
-        cameraAlpha,
-        cameraBeta,
-        100.0,
-        new BABYLON.Vector3(0, 0, 0),
-        scene,
-    );
-
-    // This attaches the camera to the canvas
-    camera.attachControl(canvas, true);
 
     // This creates a light, aiming 1,-1,-3
     new BABYLON.DirectionalLight("sun", new BABYLON.Vector3(1, -1, -3), scene);
@@ -74,11 +66,6 @@ function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
         invertY: false,
     });
     earth.material = earthMaterial;
-
-    scene.registerBeforeRender(() => {
-        camera.alpha = cameraAlpha;
-        camera.beta = cameraBeta;
-    });
 
     return scene;
 }
