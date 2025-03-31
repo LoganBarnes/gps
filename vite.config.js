@@ -6,6 +6,7 @@ export default defineConfig(({ command, mode }) => {
             alias: {
                 'babylonjs': mode === 'development' ? 'babylonjs/babylon.max' : 'babylonjs'
             }
-        }
+        },
+        base: "/gps/"
     };
 });
