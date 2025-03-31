@@ -1,9 +1,8 @@
-# BabylonJs + vite Boilerplate
+# Global Positioning System (GPS) Interactive Lesson
 
 ## Description
 
-This is a BabylonJS + vite minimal boilerplate for development and production to work with **typescript**. 
-It starts faster than webpack and allow debugging from vscode.
+This is intended to be an interactive web app allowing people to better understand how the Global Positioning System (GPS) works.
 
 ## instructions
 

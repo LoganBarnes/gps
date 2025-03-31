@@ -21,7 +21,7 @@ export class AppOne {
     }
 
     run() {
-        this.debug(true);
+        this.debug(false);
         this.engine.runRenderLoop(() => {
             this.scene.render();
         });
