@@ -6,6 +6,9 @@ export class Camera {
     private readonly defaultCameraBeta = Math.PI * 0.5;
     private readonly defaultCameraRadius = 100.0;
 
+    private threeDCameraAlpha = this.defaultCameraAlpha;
+    private threeDCameraBeta = this.defaultCameraBeta;
+
     private camera: BABYLON.ArcRotateCamera;
     private previousCameraRadius = 0.0;
 
@@ -32,6 +35,7 @@ export class Camera {
             if (this.twoD) {
                 this.camera.alpha = this.defaultCameraAlpha;
                 this.camera.beta = this.defaultCameraBeta;
+                this.camera.target.z = 0.0;
             }
 
             this.camera.radius = Math.max(
@@ -48,5 +52,13 @@ export class Camera {
                 this.camera.wheelPrecision *= ratio;
             }
         });
+    }
+
+    get is2D(): boolean {
+        return this.twoD;
+    }
+
+    set is2D(twoD: boolean) {
+        this.twoD = twoD;
     }
 }

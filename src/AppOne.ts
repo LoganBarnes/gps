@@ -1,15 +1,19 @@
 import * as BABYLON from "babylonjs";
+import { Camera } from "./Camera";
 import { Constants } from "./Constants";
+import { Gui } from "./Gui";
 import { Receiver } from "./Receiver";
 import { Satellite } from "./Satellite";
-import { Camera } from "./Camera";
 
 export class AppOne {
-    engine: BABYLON.Engine;
-    scene: BABYLON.Scene;
-    camera: Camera;
-    receiver: Receiver;
-    satellites: Satellite[] = [];
+    private engine: BABYLON.Engine;
+    private scene: BABYLON.Scene;
+
+    private camera: Camera;
+    private gui: Gui;
+
+    private receiver: Receiver;
+    private satellites: Satellite[] = [];
 
     constructor(readonly canvas: HTMLCanvasElement) {
         this.engine = new BABYLON.Engine(canvas);
@@ -17,7 +21,10 @@ export class AppOne {
             this.engine.resize();
         });
         this.scene = createScene(this.engine, this.canvas);
+
         this.camera = new Camera(this.scene, this.canvas);
+        this.gui = new Gui(this.camera, this.scene);
+
         this.receiver = new Receiver(this.scene);
         this.satellites.push(new Satellite(this.scene));
     }
