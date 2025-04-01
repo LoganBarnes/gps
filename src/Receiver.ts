@@ -1,10 +1,11 @@
 import {
-    Mesh,
-    StandardMaterial,
-    Scene,
-    MeshBuilder,
     Color3,
+    Mesh,
+    MeshBuilder,
+    Scene,
+    StandardMaterial,
     Tools,
+    Vector3,
 } from "@babylonjs/core";
 import { Constants } from "./Constants";
 
@@ -43,6 +44,9 @@ export class Receiver {
     }
     get altitudeKm(): number {
         return Constants.kiloFromMega(this.altitudeMm);
+    }
+    get position(): Vector3 {
+        return this.mesh.position;
     }
 
     set latitudeDeg(value: number) {

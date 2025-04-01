@@ -1,15 +1,15 @@
 import {
-    Engine,
-    Scene,
-    DirectionalLight,
-    MeshBuilder,
-    Vector3,
+    Axis,
+    Color3,
     Color4,
+    DirectionalLight,
+    Engine,
+    MeshBuilder,
+    Scene,
+    Space,
     StandardMaterial,
     Texture,
-    Axis,
-    Space,
-    Color3,
+    Vector3,
 } from "@babylonjs/core";
 import { Camera } from "./Camera";
 import { Constants } from "./Constants";
@@ -32,13 +32,13 @@ export class AppOne {
         window.addEventListener("resize", () => {
             this.engine.resize();
         });
-        this.scene = createScene(this.engine, this.canvas);
+        this.scene = createScene(this.engine);
 
         this.camera = new Camera(this.scene, this.canvas);
         this.gui = new Gui(this.camera, this.scene);
 
         this.receiver = new Receiver(this.scene);
-        this.satellites.push(new Satellite(this.scene));
+        this.satellites.push(new Satellite(this.scene, this.receiver));
     }
 
     debug(debugOn: boolean = true) {
@@ -57,12 +57,7 @@ export class AppOne {
     }
 }
 
-let prevCamRadius = 0.0;
-
-function createScene(engine: Engine, canvas: HTMLCanvasElement) {
-    const cameraAlpha = Math.PI * 0.5;
-    const cameraBeta = Math.PI * 0.5;
-
+function createScene(engine: Engine) {
     // This creates a basic Babylon Scene object (non-mesh)
     const scene = new Scene(engine);
     scene.useRightHandedSystem = true;

@@ -1,6 +1,6 @@
-import { Scene } from "@babylonjs/core";
 import { AdvancedDynamicTexture, Button, Control } from "@babylonjs/gui";
 import { Camera } from "./Camera";
+import { Scene } from "@babylonjs/core";
 
 export class Gui {
     private advancedTexture: AdvancedDynamicTexture;
