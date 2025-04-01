@@ -1,24 +1,31 @@
-import * as BABYLON from "babylonjs";
+import {
+    Mesh,
+    StandardMaterial,
+    Scene,
+    MeshBuilder,
+    Color3,
+    Tools,
+} from "@babylonjs/core";
 import { Constants } from "./Constants";
 
 export class Satellite {
-    private mesh: BABYLON.Mesh;
-    private material: BABYLON.StandardMaterial;
+    private mesh: Mesh;
+    private material: StandardMaterial;
     private latitudeRads: number;
     private longitudeRads: number;
 
-    constructor(readonly scene: BABYLON.Scene) {
+    constructor(readonly scene: Scene) {
         // Our built-in 'sphere' shape.
-        this.mesh = BABYLON.MeshBuilder.CreateSphere(
+        this.mesh = MeshBuilder.CreateSphere(
             "earth",
             { diameter: Constants.satelliteDiameterMm, segments: 16 },
             scene,
         );
 
-        this.material = new BABYLON.StandardMaterial("receiverMaterial", scene);
-        this.material.specularColor = BABYLON.Color3.Black();
-        this.material.diffuseColor = BABYLON.Color3.Black();
-        this.material.emissiveColor = BABYLON.Color3.White();
+        this.material = new StandardMaterial("receiverMaterial", scene);
+        this.material.specularColor = Color3.Black();
+        this.material.diffuseColor = Color3.Black();
+        this.material.emissiveColor = Color3.White();
         this.mesh.material = this.material;
 
         this.latitudeRads = 0.0;
@@ -27,18 +34,18 @@ export class Satellite {
     }
 
     get latitudeDeg(): number {
-        return BABYLON.Tools.ToDegrees(this.latitudeRads);
+        return Tools.ToDegrees(this.latitudeRads);
     }
     get longitudeDeg(): number {
-        return BABYLON.Tools.ToDegrees(this.longitudeRads);
+        return Tools.ToDegrees(this.longitudeRads);
     }
 
     set latitudeDeg(value: number) {
-        this.latitudeRads = BABYLON.Tools.ToRadians(value);
+        this.latitudeRads = Tools.ToRadians(value);
         this.updatePosition();
     }
     set longitudeDeg(value: number) {
-        this.longitudeRads = BABYLON.Tools.ToRadians(value);
+        this.longitudeRads = Tools.ToRadians(value);
         this.updatePosition();
     }
 

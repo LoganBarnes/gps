@@ -1,28 +1,25 @@
-import * as BABYLON from "babylonjs";
-import * as GUI from "@babylonjs/gui";
+import { Scene } from "@babylonjs/core";
+import { AdvancedDynamicTexture, Button, Control } from "@babylonjs/gui";
 import { Camera } from "./Camera";
 
 export class Gui {
-    private advancedTexture: GUI.AdvancedDynamicTexture;
-    private twoDThreeDButton: GUI.Button;
+    private advancedTexture: AdvancedDynamicTexture;
+    private twoDThreeDButton: Button;
 
     private camera: Camera;
 
-    constructor(camera: Camera, scene: BABYLON.Scene) {
+    constructor(camera: Camera, scene: Scene) {
         this.camera = camera;
 
         // GUI
-        this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI(
+        this.advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI(
             "UI",
-            true,
+            false,
             scene,
         );
         this.advancedTexture.isForeground = true;
 
-        this.twoDThreeDButton = GUI.Button.CreateSimpleButton(
-            "2d3dButton",
-            "2D",
-        );
+        this.twoDThreeDButton = Button.CreateSimpleButton("2d3dButton", "2D");
         this.twoDThreeDButton.width = "40px";
         this.twoDThreeDButton.height = "40px";
         this.twoDThreeDButton.color = "white";
@@ -31,9 +28,9 @@ export class Gui {
         this.twoDThreeDButton.paddingLeft = 5;
         this.twoDThreeDButton.paddingTop = 5;
         this.twoDThreeDButton.horizontalAlignment =
-            GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+            Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.twoDThreeDButton.verticalAlignment =
-            GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            Control.VERTICAL_ALIGNMENT_TOP;
 
         this.twoDThreeDButton.onPointerUpObservable.add(() => {
             this.camera.is2D = !this.camera.is2D;

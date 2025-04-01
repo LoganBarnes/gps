@@ -1,4 +1,4 @@
-import * as BABYLON from "babylonjs";
+import { ArcRotateCamera, Scene, Vector3 } from "@babylonjs/core";
 import { Constants } from "./Constants";
 
 export class Camera {
@@ -9,19 +9,19 @@ export class Camera {
     private threeDCameraAlpha = this.defaultCameraAlpha;
     private threeDCameraBeta = this.defaultCameraBeta;
 
-    private camera: BABYLON.ArcRotateCamera;
+    private camera: ArcRotateCamera;
     private previousCameraRadius = 0.0;
 
     private twoD: boolean = true;
 
-    constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
+    constructor(scene: Scene, canvas: HTMLCanvasElement) {
         // This creates and positions a free camera (non-mesh)
-        this.camera = new BABYLON.ArcRotateCamera(
+        this.camera = new ArcRotateCamera(
             "Camera",
             this.defaultCameraAlpha,
             this.defaultCameraBeta,
             this.defaultCameraRadius,
-            new BABYLON.Vector3(0, 0, 0),
+            new Vector3(0, 0, 0),
             scene,
         );
         this.camera.panningSensibility = this.camera.radius * 2.0;

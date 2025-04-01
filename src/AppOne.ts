@@ -1,4 +1,16 @@
-import * as BABYLON from "babylonjs";
+import {
+    Engine,
+    Scene,
+    DirectionalLight,
+    MeshBuilder,
+    Vector3,
+    Color4,
+    StandardMaterial,
+    Texture,
+    Axis,
+    Space,
+    Color3,
+} from "@babylonjs/core";
 import { Camera } from "./Camera";
 import { Constants } from "./Constants";
 import { Gui } from "./Gui";
@@ -6,8 +18,8 @@ import { Receiver } from "./Receiver";
 import { Satellite } from "./Satellite";
 
 export class AppOne {
-    private engine: BABYLON.Engine;
-    private scene: BABYLON.Scene;
+    private engine: Engine;
+    private scene: Scene;
 
     private camera: Camera;
     private gui: Gui;
@@ -16,7 +28,7 @@ export class AppOne {
     private satellites: Satellite[] = [];
 
     constructor(readonly canvas: HTMLCanvasElement) {
-        this.engine = new BABYLON.Engine(canvas);
+        this.engine = new Engine(canvas);
         window.addEventListener("resize", () => {
             this.engine.resize();
         });
@@ -47,29 +59,29 @@ export class AppOne {
 
 let prevCamRadius = 0.0;
 
-function createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement) {
+function createScene(engine: Engine, canvas: HTMLCanvasElement) {
     const cameraAlpha = Math.PI * 0.5;
     const cameraBeta = Math.PI * 0.5;
 
     // This creates a basic Babylon Scene object (non-mesh)
-    const scene = new BABYLON.Scene(engine);
+    const scene = new Scene(engine);
     scene.useRightHandedSystem = true;
-    scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
+    scene.clearColor = new Color4(0, 0, 0, 1);
 
     // This creates a light, aiming 1,-1,-3
-    new BABYLON.DirectionalLight("sun", new BABYLON.Vector3(1, -1, -3), scene);
+    new DirectionalLight("sun", new Vector3(1, -1, -3), scene);
 
     // Our built-in 'sphere' shape.
-    const earth = BABYLON.MeshBuilder.CreateSphere(
+    const earth = MeshBuilder.CreateSphere(
         "earth",
         { diameter: Constants.earthDiameterMm, segments: 32 },
         scene,
     );
-    earth.rotate(BABYLON.Axis.Y, Math.PI * 0.75, BABYLON.Space.LOCAL);
+    earth.rotate(Axis.Y, Math.PI * 0.75, Space.LOCAL);
 
-    const earthMaterial = new BABYLON.StandardMaterial("earthMaterial", scene);
-    earthMaterial.specularColor = BABYLON.Color3.Black();
-    earthMaterial.diffuseTexture = new BABYLON.Texture("./earth.jpg", scene, {
+    const earthMaterial = new StandardMaterial("earthMaterial", scene);
+    earthMaterial.specularColor = Color3.Black();
+    earthMaterial.diffuseTexture = new Texture("./earth.jpg", scene, {
         invertY: false,
     });
     earth.material = earthMaterial;
