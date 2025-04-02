@@ -76,7 +76,7 @@ function createScene(engine: Engine) {
 
     const earthMaterial = new StandardMaterial("earthMaterial", scene);
     earthMaterial.specularColor = Color3.Black();
-    earthMaterial.diffuseTexture = new Texture("./earth.jpg", scene, {
+    earthMaterial.diffuseTexture = new Texture("./small-earth.jpg", scene, {
         invertY: false,
     });
     earth.material = earthMaterial;
