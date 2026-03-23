@@ -28,5 +28,6 @@
   "dependencies": {
     "@babylonjs/gui": "^8.0.2",
     "babylonjs": "^8.0.2"
-  }
+  },
+  "type": "module"
 }
