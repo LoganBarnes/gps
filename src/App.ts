@@ -39,6 +39,16 @@ export class AppOne {
 
         this.receiver = new Receiver(this.scene);
         this.satellites.push(new Satellite(this.scene, this.receiver));
+
+        // Unfinished
+        this.scene.onPointerDown = () => {
+            const ray = this.camera.getMouseRay(this.scene);
+            const hit = this.scene.pickWithRay(ray);
+
+            if (hit && hit.pickedMesh && hit.pickedMesh.metadata == "cannon") {
+                console.log("picked cannon");
+            }
+        };
     }
 
     debug(debugOn: boolean = true) {

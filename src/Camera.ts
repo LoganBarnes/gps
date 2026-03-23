@@ -1,4 +1,4 @@
-import { ArcRotateCamera, Scene, Vector3 } from "@babylonjs/core";
+import { ArcRotateCamera, Matrix, Ray, Scene, Vector3 } from "@babylonjs/core";
 import { Constants } from "./Constants";
 
 export class Camera {
@@ -60,5 +60,15 @@ export class Camera {
 
     set is2D(twoD: boolean) {
         this.twoD = twoD;
+    }
+
+    public getMouseRay(scene: Scene): Ray {
+        return scene.createPickingRay(
+            scene.pointerX,
+            scene.pointerY,
+            Matrix.Identity(),
+            this.camera,
+            false,
+        );
     }
 }
