@@ -43,7 +43,10 @@ export class Satellite {
         );
         this.mesh.isPickable = true;
 
-        this.material = new StandardMaterial(`satelliteMaterial-${satelliteId}`, scene);
+        this.material = new StandardMaterial(
+            `satelliteMaterial-${satelliteId}`,
+            scene,
+        );
         this.material.specularColor = Color3.Black();
         this.material.diffuseColor = Color3.Black();
         this.material.emissiveColor = Color3.White();
@@ -52,13 +55,16 @@ export class Satellite {
         this.latitudeRads = Tools.ToRadians(latitudeDeg);
         this.longitudeRads = Tools.ToRadians(longitudeDeg);
 
-        this.lines = MeshBuilder.CreateDashedLines(`satellite-lines-${satelliteId}`, {
-            points: [this.mesh.position, this.receiver.position],
-            dashSize: Satellite.lineDashSize,
-            gapSize: Satellite.lineGapSize,
-            dashNb: 1,
-            updatable: true,
-        });
+        this.lines = MeshBuilder.CreateDashedLines(
+            `satellite-lines-${satelliteId}`,
+            {
+                points: [this.mesh.position, this.receiver.position],
+                dashSize: Satellite.lineDashSize,
+                gapSize: Satellite.lineGapSize,
+                dashNb: 1,
+                updatable: true,
+            },
+        );
 
         this.updatePosition();
     }
