@@ -10,11 +10,15 @@ export class Camera {
     private threeDCameraBeta = this.defaultCameraBeta;
 
     private camera: ArcRotateCamera;
+    private canvas: HTMLCanvasElement;
+    private controlsAttached = true;
     private previousCameraRadius = 0.0;
 
     private twoD: boolean = true;
 
     constructor(scene: Scene, canvas: HTMLCanvasElement) {
+        this.canvas = canvas;
+
         // This creates and positions a free camera (non-mesh)
         this.camera = new ArcRotateCamera(
             "Camera",
@@ -60,6 +64,19 @@ export class Camera {
 
     set is2D(twoD: boolean) {
         this.twoD = twoD;
+    }
+
+    public setControlsEnabled(enabled: boolean): void {
+        if (enabled === this.controlsAttached) {
+            return;
+        }
+
+        this.controlsAttached = enabled;
+        if (enabled) {
+            this.camera.attachControl(this.canvas, true);
+        } else {
+            this.camera.detachControl();
+        }
     }
 
     public getMouseRay(scene: Scene): Ray {

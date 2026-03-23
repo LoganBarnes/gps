@@ -1,8 +1,10 @@
 import {
+    AbstractMesh,
     Color3,
     LinesMesh,
     Mesh,
     MeshBuilder,
+    Ray,
     Scene,
     StandardMaterial,
     Tools,
@@ -31,10 +33,11 @@ export class Satellite {
 
         // Our built-in 'sphere' shape.
         this.mesh = MeshBuilder.CreateSphere(
-            "earth",
+            "satellite",
             { diameter: Constants.satelliteDiameterMm, segments: 16 },
             scene,
         );
+        this.mesh.isPickable = true;
 
         this.material = new StandardMaterial("receiverMaterial", scene);
         this.material.specularColor = Color3.Black();
@@ -47,6 +50,9 @@ export class Satellite {
 
         this.lines = MeshBuilder.CreateDashedLines("lines", {
             points: [this.mesh.position, this.receiver.position],
+            dashSize: Satellite.lineDashSize,
+            gapSize: Satellite.lineGapSize,
+            dashNb: 1,
             updatable: true,
         });
 
@@ -69,6 +75,20 @@ export class Satellite {
         this.updatePosition();
     }
 
+    public isPickMesh(mesh: AbstractMesh | null): boolean {
+        return mesh === this.mesh;
+    }
+
+    public moveToRay(ray: Ray): boolean {
+        const nextPosition = Satellite.intersectOrbit(ray);
+        if (nextPosition === null) {
+            return false;
+        }
+
+        this.setPosition(nextPosition);
+        return true;
+    }
+
     public updatePosition(): void {
         const radius = Constants.satelliteOrbitRadiusMm;
 
@@ -82,7 +102,22 @@ export class Satellite {
         const z = radius * sinLon;
 
         this.mesh.position.set(x, y, z);
+        this.refreshLine();
+    }
 
+    private setPosition(position: Vector3): void {
+        const orbitPoint = position
+            .clone()
+            .normalize()
+            .scaleInPlace(Constants.satelliteOrbitRadiusMm);
+        const radius = orbitPoint.length();
+
+        this.latitudeRads = Math.atan2(orbitPoint.x, orbitPoint.y);
+        this.longitudeRads = Math.asin(orbitPoint.z / radius);
+        this.updatePosition();
+    }
+
+    private refreshLine(): void {
         const length = Vector3.Distance(
             this.mesh.position,
             this.receiver.position,
@@ -90,14 +125,38 @@ export class Satellite {
         const numDashes =
             length / (Satellite.lineDashSize + Satellite.lineGapSize);
 
-        console.log(`length: ${length}, numDashes: ${numDashes}`);
-
         this.lines = MeshBuilder.CreateDashedLines("lines", {
             points: [this.mesh.position, this.receiver.position],
             dashSize: Satellite.lineDashSize,
             gapSize: Satellite.lineGapSize,
-            dashNb: Math.floor(numDashes),
+            dashNb: Math.max(1, Math.floor(numDashes)),
             updatable: true,
+            instance: this.lines,
         });
+    }
+
+    private static intersectOrbit(ray: Ray): Vector3 | null {
+        const radius = Constants.satelliteOrbitRadiusMm;
+        const a = Vector3.Dot(ray.direction, ray.direction);
+        const b = 2.0 * Vector3.Dot(ray.origin, ray.direction);
+        const c = Vector3.Dot(ray.origin, ray.origin) - radius * radius;
+        const discriminant = b * b - 4.0 * a * c;
+
+        if (discriminant < 0.0) {
+            return null;
+        }
+
+        const sqrtDiscriminant = Math.sqrt(discriminant);
+        const nearDistance = (-b - sqrtDiscriminant) / (2.0 * a);
+        const farDistance = (-b + sqrtDiscriminant) / (2.0 * a);
+        const distance = [nearDistance, farDistance].find(
+            (candidate) => candidate >= 0.0,
+        );
+
+        if (distance === undefined) {
+            return null;
+        }
+
+        return ray.origin.add(ray.direction.scale(distance));
     }
 }

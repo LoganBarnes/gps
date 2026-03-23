@@ -1,4 +1,5 @@
 import {
+    AbstractMesh,
     Axis,
     Color3,
     Color4,
@@ -26,6 +27,7 @@ export class AppOne {
 
     private receiver: Receiver;
     private satellites: Satellite[] = [];
+    private draggedSatellite: Satellite | null = null;
 
     constructor(readonly canvas: HTMLCanvasElement) {
         this.engine = new Engine(canvas);
@@ -40,14 +42,33 @@ export class AppOne {
         this.receiver = new Receiver(this.scene);
         this.satellites.push(new Satellite(this.scene, this.receiver));
 
-        // Unfinished
         this.scene.onPointerDown = () => {
-            const ray = this.camera.getMouseRay(this.scene);
-            const hit = this.scene.pickWithRay(ray);
-
-            if (hit && hit.pickedMesh && hit.pickedMesh.metadata == "cannon") {
-                console.log("picked cannon");
+            const satellite = this.pickSatellite();
+            if (satellite === null) {
+                return;
             }
+
+            this.draggedSatellite = satellite;
+            this.camera.setControlsEnabled(false);
+            this.draggedSatellite.moveToRay(this.camera.getMouseRay(this.scene));
+        };
+
+        this.scene.onPointerMove = () => {
+            if (this.draggedSatellite === null) {
+                return;
+            }
+
+            this.draggedSatellite.moveToRay(this.camera.getMouseRay(this.scene));
+        };
+
+        this.scene.onPointerUp = () => {
+            if (this.draggedSatellite === null) {
+                return;
+            }
+
+            this.draggedSatellite.moveToRay(this.camera.getMouseRay(this.scene));
+            this.draggedSatellite = null;
+            this.camera.setControlsEnabled(true);
         };
     }
 
@@ -64,6 +85,26 @@ export class AppOne {
         this.engine.runRenderLoop(() => {
             this.scene.render();
         });
+    }
+
+    private pickSatellite(): Satellite | null {
+        const ray = this.camera.getMouseRay(this.scene);
+        const hit = this.scene.pickWithRay(
+            ray,
+            (mesh: AbstractMesh) =>
+                this.satellites.some((satellite) => satellite.isPickMesh(mesh)),
+            true,
+        );
+
+        if (!hit?.pickedMesh) {
+            return null;
+        }
+
+        return (
+            this.satellites.find((satellite) =>
+                satellite.isPickMesh(hit.pickedMesh),
+            ) ?? null
+        );
     }
 }
 
