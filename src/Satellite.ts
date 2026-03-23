@@ -14,6 +14,7 @@ import { Constants } from "./Constants";
 import { Receiver } from "./Receiver";
 
 export class Satellite {
+    private static nextId = 0;
     private receiver: Receiver;
 
     private mesh: Mesh;
@@ -28,27 +29,30 @@ export class Satellite {
     constructor(
         readonly scene: Scene,
         receiver: Receiver,
+        latitudeDeg: number = 0.0,
+        longitudeDeg: number = 0.0,
     ) {
         this.receiver = receiver;
+        const satelliteId = Satellite.nextId++;
 
         // Our built-in 'sphere' shape.
         this.mesh = MeshBuilder.CreateSphere(
-            "satellite",
+            `satellite-${satelliteId}`,
             { diameter: Constants.satelliteDiameterMm, segments: 16 },
             scene,
         );
         this.mesh.isPickable = true;
 
-        this.material = new StandardMaterial("receiverMaterial", scene);
+        this.material = new StandardMaterial(`satelliteMaterial-${satelliteId}`, scene);
         this.material.specularColor = Color3.Black();
         this.material.diffuseColor = Color3.Black();
         this.material.emissiveColor = Color3.White();
         this.mesh.material = this.material;
 
-        this.latitudeRads = 0.0;
-        this.longitudeRads = 0.0;
+        this.latitudeRads = Tools.ToRadians(latitudeDeg);
+        this.longitudeRads = Tools.ToRadians(longitudeDeg);
 
-        this.lines = MeshBuilder.CreateDashedLines("lines", {
+        this.lines = MeshBuilder.CreateDashedLines(`satellite-lines-${satelliteId}`, {
             points: [this.mesh.position, this.receiver.position],
             dashSize: Satellite.lineDashSize,
             gapSize: Satellite.lineGapSize,
@@ -79,14 +83,15 @@ export class Satellite {
         return mesh === this.mesh;
     }
 
-    public moveToRay(ray: Ray): boolean {
-        const nextPosition = Satellite.intersectOrbit(ray);
+    public moveToRay(ray: Ray, constrainToXY: boolean = false): boolean {
+        const nextPosition = constrainToXY
+            ? Satellite.intersectXYPlane(ray)
+            : Satellite.intersectOrbit(ray);
         if (nextPosition === null) {
             return false;
         }
 
-        this.setPosition(nextPosition);
-        return true;
+        return this.setPosition(nextPosition);
     }
 
     public updatePosition(): void {
@@ -105,7 +110,11 @@ export class Satellite {
         this.refreshLine();
     }
 
-    private setPosition(position: Vector3): void {
+    private setPosition(position: Vector3): boolean {
+        if (position.lengthSquared() === 0.0) {
+            return false;
+        }
+
         const orbitPoint = position
             .clone()
             .normalize()
@@ -115,6 +124,7 @@ export class Satellite {
         this.latitudeRads = Math.atan2(orbitPoint.x, orbitPoint.y);
         this.longitudeRads = Math.asin(orbitPoint.z / radius);
         this.updatePosition();
+        return true;
     }
 
     private refreshLine(): void {
@@ -158,5 +168,15 @@ export class Satellite {
         }
 
         return ray.origin.add(ray.direction.scale(distance));
+    }
+
+    private static intersectXYPlane(ray: Ray): Vector3 | null {
+        const point = ray.intersectsAxis("z", 0.0);
+        if (point === null) {
+            return null;
+        }
+
+        point.z = 0.0;
+        return point;
     }
 }

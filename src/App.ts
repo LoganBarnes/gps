@@ -19,6 +19,15 @@ import { Receiver } from "./Receiver";
 import { Satellite } from "./Satellite";
 
 export class AppOne {
+    private static readonly initialSatellitePositions = [
+        { latitudeDeg: 0.0, longitudeDeg: 0.0 },
+        { latitudeDeg: 35.0, longitudeDeg: 45.0 },
+        { latitudeDeg: -40.0, longitudeDeg: 110.0 },
+        { latitudeDeg: 60.0, longitudeDeg: -75.0 },
+        { latitudeDeg: -65.0, longitudeDeg: -150.0 },
+        { latitudeDeg: 20.0, longitudeDeg: 170.0 },
+    ];
+
     private engine: Engine;
     private scene: Scene;
 
@@ -40,7 +49,15 @@ export class AppOne {
         this.gui = new Gui(this.camera, this.scene);
 
         this.receiver = new Receiver(this.scene);
-        this.satellites.push(new Satellite(this.scene, this.receiver));
+        this.satellites = AppOne.initialSatellitePositions.map(
+            ({ latitudeDeg, longitudeDeg }) =>
+                new Satellite(
+                    this.scene,
+                    this.receiver,
+                    latitudeDeg,
+                    longitudeDeg,
+                ),
+        );
 
         this.scene.onPointerDown = () => {
             const satellite = this.pickSatellite();
@@ -50,7 +67,10 @@ export class AppOne {
 
             this.draggedSatellite = satellite;
             this.camera.setControlsEnabled(false);
-            this.draggedSatellite.moveToRay(this.camera.getMouseRay(this.scene));
+            this.draggedSatellite.moveToRay(
+                this.camera.getMouseRay(this.scene),
+                this.camera.is2D,
+            );
         };
 
         this.scene.onPointerMove = () => {
@@ -58,7 +78,10 @@ export class AppOne {
                 return;
             }
 
-            this.draggedSatellite.moveToRay(this.camera.getMouseRay(this.scene));
+            this.draggedSatellite.moveToRay(
+                this.camera.getMouseRay(this.scene),
+                this.camera.is2D,
+            );
         };
 
         this.scene.onPointerUp = () => {
@@ -66,7 +89,10 @@ export class AppOne {
                 return;
             }
 
-            this.draggedSatellite.moveToRay(this.camera.getMouseRay(this.scene));
+            this.draggedSatellite.moveToRay(
+                this.camera.getMouseRay(this.scene),
+                this.camera.is2D,
+            );
             this.draggedSatellite = null;
             this.camera.setControlsEnabled(true);
         };
