@@ -2,7 +2,6 @@ import {
     AbstractMesh,
     Color3,
     LinesMesh,
-    Mesh,
     MeshBuilder,
     Ray,
     Scene,
@@ -11,16 +10,14 @@ import {
     Vector3,
 } from "@babylonjs/core";
 import { Constants } from "./Constants";
+import { OrbitalMesh } from "./OrbitalMesh";
 import { Receiver } from "./Receiver";
 
 export class Satellite {
     private static nextId = 0;
     private receiver: Receiver;
 
-    private mesh: Mesh;
-    private material: StandardMaterial;
-    private latitudeRads: number;
-    private longitudeRads: number;
+    private readonly orbitalMesh: OrbitalMesh;
 
     private lines: LinesMesh;
     private static readonly lineDashSize = 0.5;
@@ -35,58 +32,43 @@ export class Satellite {
         this.receiver = receiver;
         const satelliteId = Satellite.nextId++;
 
-        // Our built-in 'sphere' shape.
-        this.mesh = MeshBuilder.CreateSphere(
-            `satellite-${satelliteId}`,
-            { diameter: Constants.satelliteDiameterMm, segments: 16 },
-            scene,
+        this.orbitalMesh = new OrbitalMesh(
+            // Our built-in 'sphere' shape.
+            MeshBuilder.CreateSphere(
+                `satellite-${satelliteId}`,
+                { diameter: Constants.satelliteDiameterMm, segments: 16 },
+                scene,
+            ),
+            new StandardMaterial(`satelliteMaterial-${satelliteId}`, scene),
+            Tools.ToRadians(latitudeDeg),
+            Tools.ToRadians(longitudeDeg),
+            Constants.satelliteOrbitRadiusMm,
         );
-        this.mesh.isPickable = true;
 
-        this.material = new StandardMaterial(
-            `satelliteMaterial-${satelliteId}`,
-            scene,
-        );
-        this.material.specularColor = Color3.Black();
-        this.material.diffuseColor = Color3.Black();
-        this.material.emissiveColor = Color3.White();
-        this.mesh.material = this.material;
+        this.orbital.mesh.isPickable = true;
 
-        this.latitudeRads = Tools.ToRadians(latitudeDeg);
-        this.longitudeRads = Tools.ToRadians(longitudeDeg);
+        this.orbital.material.specularColor = Color3.Black();
+        this.orbital.material.diffuseColor = Color3.Black();
+        this.orbital.material.emissiveColor = Color3.White();
 
         this.lines = MeshBuilder.CreateDashedLines(
             `satellite-lines-${satelliteId}`,
             {
-                points: [this.mesh.position, this.receiver.position],
+                points: [this.orbital.position, this.receiver.orbital.position],
                 dashSize: Satellite.lineDashSize,
                 gapSize: Satellite.lineGapSize,
                 dashNb: 1,
                 updatable: true,
             },
         );
-
-        this.updatePosition();
     }
 
-    get latitudeDeg(): number {
-        return Tools.ToDegrees(this.latitudeRads);
-    }
-    get longitudeDeg(): number {
-        return Tools.ToDegrees(this.longitudeRads);
-    }
-
-    set latitudeDeg(value: number) {
-        this.latitudeRads = Tools.ToRadians(value);
-        this.updatePosition();
-    }
-    set longitudeDeg(value: number) {
-        this.longitudeRads = Tools.ToRadians(value);
-        this.updatePosition();
+    get orbital(): OrbitalMesh {
+        return this.orbitalMesh;
     }
 
     public isPickMesh(mesh: AbstractMesh | null): boolean {
-        return mesh === this.mesh;
+        return mesh === this.orbitalMesh.mesh;
     }
 
     public moveToRay(ray: Ray, constrainToXY: boolean = false): boolean {
@@ -100,22 +82,6 @@ export class Satellite {
         return this.setPosition(nextPosition);
     }
 
-    public updatePosition(): void {
-        const radius = Constants.satelliteOrbitRadiusMm;
-
-        const cosLat = Math.cos(this.latitudeRads);
-        const sinLat = Math.sin(this.latitudeRads);
-        const cosLon = Math.cos(this.longitudeRads);
-        const sinLon = Math.sin(this.longitudeRads);
-
-        const x = radius * cosLon * sinLat;
-        const y = radius * cosLon * cosLat;
-        const z = radius * sinLon;
-
-        this.mesh.position.set(x, y, z);
-        this.refreshLine();
-    }
-
     private setPosition(position: Vector3): boolean {
         if (position.lengthSquared() === 0.0) {
             return false;
@@ -127,22 +93,25 @@ export class Satellite {
             .scaleInPlace(Constants.satelliteOrbitRadiusMm);
         const radius = orbitPoint.length();
 
-        this.latitudeRads = Math.atan2(orbitPoint.x, orbitPoint.y);
-        this.longitudeRads = Math.asin(orbitPoint.z / radius);
-        this.updatePosition();
+        this.orbital.latitudeRads = Math.atan2(orbitPoint.x, orbitPoint.y);
+        this.orbital.longitudeRads = Math.asin(orbitPoint.z / radius);
+        this.refreshLine();
         return true;
     }
 
     private refreshLine(): void {
         const length = Vector3.Distance(
-            this.mesh.position,
-            this.receiver.position,
+            this.orbital.mesh.position,
+            this.receiver.orbital.position,
         );
         const numDashes =
             length / (Satellite.lineDashSize + Satellite.lineGapSize);
 
         this.lines = MeshBuilder.CreateDashedLines("lines", {
-            points: [this.mesh.position, this.receiver.position],
+            points: [
+                this.orbital.mesh.position,
+                this.receiver.orbital.position,
+            ],
             dashSize: Satellite.lineDashSize,
             gapSize: Satellite.lineGapSize,
             dashNb: Math.max(1, Math.floor(numDashes)),

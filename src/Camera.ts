@@ -6,11 +6,8 @@ export class Camera {
     private readonly defaultCameraBeta = Math.PI * 0.5;
     private readonly defaultCameraRadius = 100.0;
 
-    private threeDCameraAlpha = this.defaultCameraAlpha;
-    private threeDCameraBeta = this.defaultCameraBeta;
-
-    private camera: ArcRotateCamera;
-    private canvas: HTMLCanvasElement;
+    private readonly camera: ArcRotateCamera;
+    private readonly canvas: HTMLCanvasElement;
     private controlsAttached = true;
     private previousCameraRadius = 0.0;
 

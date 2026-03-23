@@ -28,13 +28,13 @@ export class AppOne {
         { latitudeDeg: 20.0, longitudeDeg: 170.0 },
     ];
 
-    private engine: Engine;
-    private scene: Scene;
+    private readonly engine: Engine;
+    private readonly scene: Scene;
 
-    private camera: Camera;
+    private readonly camera: Camera;
     private gui: Gui;
 
-    private receiver: Receiver;
+    private readonly receiver: Receiver;
     private satellites: Satellite[] = [];
     private draggedSatellite: Satellite | null = null;
 

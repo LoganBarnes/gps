@@ -4,7 +4,7 @@ import { Scene } from "@babylonjs/core";
 
 export class Gui {
     private advancedTexture: AdvancedDynamicTexture;
-    private twoDThreeDButton: Button;
+    private readonly twoDThreeDButton: Button;
 
     private camera: Camera;
 
